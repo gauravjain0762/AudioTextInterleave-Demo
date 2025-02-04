@@ -49,7 +49,7 @@ export default function App() {
   const flatListRef = useRef<FlatList<TranscriptEntry>>(null);
   const insets = useSafeAreaInsets();
 
-  // Load audio and
+  // Load audio
   async function loadAudio() {
     const { sound } = await Audio.Sound.createAsync({ uri: audioUrl });
     soundRef.current = sound;
@@ -73,10 +73,10 @@ export default function App() {
 
         // Stop playback when finished
         if (status.didJustFinish) {
-          setIsPlaying(false); // Stop the play state
-          setPosition(0); // Reset position
-          setCurrentPhrase(null); // Clear highlighted text
-          await sound.stopAsync(); // Stop audio instead of looping
+          setIsPlaying(false);
+          setPosition(0);
+          setCurrentPhrase(null);
+          await sound.stopAsync();
         }
       }
     });
