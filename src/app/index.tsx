@@ -49,37 +49,42 @@ export default function App() {
   const flatListRef = useRef<FlatList<TranscriptEntry>>(null);
   const insets = useSafeAreaInsets();
 
-  // Load audio
+  // Load audio and
   async function loadAudio() {
-    const { sound } = await Audio.Sound.createAsync({ uri: audioUrl });
-    soundRef.current = sound;
-    setSound(sound);
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri: audioUrl });
+      soundRef.current = sound;
+      setSound(sound);
 
-    // Set up playback
-    sound.setOnPlaybackStatusUpdate(async (status) => {
-      if (status.isLoaded) {
-        setIsLoading(false);
-        setPosition(status.positionMillis / 1000);
-        setDuration(status.durationMillis ? status.durationMillis / 1000 : 0);
+      // Set up playback
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded) {
+          console.log("status.positionMillis", status.positionMillis);
+          setIsLoading(false);
+          setPosition(status.positionMillis / 1000);
+          setDuration(status.durationMillis ? status.durationMillis / 1000 : 0);
 
-        // Highlight the current transcript phrase
-        const current = transcript.find(
-          (phrase, index) =>
-            phrase.start <= status.positionMillis / 1000 &&
-            (index === transcript.length - 1 ||
-              transcript[index + 1].start > status.positionMillis / 1000)
-        );
-        setCurrentPhrase(current || null);
+          // Highlight
+          const current = transcript.find(
+            (phrase, index) =>
+              phrase.start <= status.positionMillis / 1000 &&
+              (index === transcript.length - 1 ||
+                transcript[index + 1].start > status.positionMillis / 1000)
+          );
+          setCurrentPhrase(current || null);
 
-        // Stop playback when finished
-        if (status.didJustFinish) {
-          setIsPlaying(false);
-          setPosition(0);
-          setCurrentPhrase(null);
-          await sound.stopAsync();
+          //  reset the state
+          if (status.didJustFinish) {
+            setIsPlaying(false);
+            setPosition(0);
+            setCurrentPhrase(null);
+            await sound.stopAsync();
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error("Error loading audio:", error);
+    }
   }
 
   // Play audio
